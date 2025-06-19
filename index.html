@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Briefcase Combination Lock</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #2c3e50, #3498db);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+        }
+
+        .container {
+            text-align: center;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .briefcase-container {
+            position: relative;
+            margin: 30px 0;
+        }
+
+        .briefcase {
+            width: 300px;
+            height: 200px;
+            margin: 0 auto;
+            position: relative;
+            background: #8B4513;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            transition: all 0.5s ease;
+        }
+
+        .briefcase.closed {
+            background: linear-gradient(135deg, #8B4513, #A0522D);
+        }
+
+        .briefcase.open {
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            transform: perspective(300px) rotateX(-15deg);
+        }
+
+        .briefcase::before {
+            content: '';
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 8px;
+            background: #654321;
+            border-radius: 4px;
+        }
+
+        .briefcase::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 60px;
+            height: 3px;
+            background: #654321;
+            border-radius: 2px;
+        }
+
+        .lock-display {
+            margin: 20px 0;
+        }
+
+        .combination-inputs {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .digit-input {
+            width: 60px;
+            height: 80px;
+            font-size: 2em;
+            text-align: center;
+            border: 3px solid #34495e;
+            border-radius: 10px;
+            background: #ecf0f1;
+            color: #2c3e50;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .digit-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 10px rgba(52, 152, 219, 0.5);
+            transform: scale(1.05);
+        }
+
+        .combination-label {
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .message {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 10px;
+            font-size: 1.2em;
+            font-weight: bold;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.5s ease;
+        }
+
+        .message.hidden {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .message.success {
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            color: white;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .message.error {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .reset-btn {
+            margin-top: 20px;
+            padding: 12px 25px;
+            background: linear-gradient(135deg, #34495e, #2c3e50);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .reset-btn:hover {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .treasure {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 3em;
+            opacity: 0;
+            transition: all 0.5s ease;
+        }
+
+        .treasure.visible {
+            opacity: 1;
+            font-size: 18px;
+        }
+
+        @keyframes sparkle {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.1); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔒 Mallette de João</h1>
+        
+        <div class="briefcase-container">
+            <div class="briefcase closed" id="briefcase">
+                <div class="treasure" id="treasure">
+                    Vous trouvez un message dans la mallette :
+                    <br>
+                    Risques potentiels de la soirée : Catherine Sullivan, Isabella Bianchi.
+
+                </div>
+            </div>
+        </div>
+
+        <div class="lock-display">
+            <div class="combination-label">Entrez le code:</div>
+            <div class="combination-inputs">
+                <input type="number" class="digit-input" id="digit1" min="0" max="9" maxlength="1">
+                <input type="number" class="digit-input" id="digit2" min="0" max="9" maxlength="1">
+                <input type="number" class="digit-input" id="digit3" min="0" max="9" maxlength="1">
+                <input type="number" class="digit-input" id="digit4" min="0" max="9" maxlength="1">
+            </div>
+        </div>
+
+        <div class="message hidden" id="message"></div>
+        
+        <button class="reset-btn" onclick="resetCombination()">Reset</button>
+    </div>
+
+    <script>
+        const correctCombination = '1956';
+        const briefcase = document.getElementById('briefcase');
+        const treasure = document.getElementById('treasure');
+        const message = document.getElementById('message');
+        const digitInputs = document.querySelectorAll('.digit-input');
+
+        // Add event listeners to each digit input
+        digitInputs.forEach((input, index) => {
+            input.addEventListener('input', function() {
+                // Ensure only single digit
+                if (this.value.length > 1) {
+                    this.value = this.value.slice(-1);
+                }
+                
+                // Move to next input if digit entered
+                if (this.value && index < digitInputs.length - 1) {
+                    digitInputs[index + 1].focus();
+                }
+                
+                checkCombination();
+            });
+
+            input.addEventListener('keydown', function(e) {
+                // Handle backspace to move to previous input
+                if (e.key === 'Backspace' && !this.value && index > 0) {
+                    digitInputs[index - 1].focus();
+                }
+            });
+        });
+
+        function checkCombination() {
+            let currentCombination = '';
+            digitInputs.forEach(input => {
+                currentCombination += input.value || '0';
+            });
+
+            if (currentCombination.length === 4) {
+                if (currentCombination === correctCombination) {
+                    openBriefcase();
+                } else {
+                    showError();
+                }
+            } else {
+                hideMessage();
+            }
+        }
+
+        function openBriefcase() {
+            briefcase.classList.remove('closed');
+            briefcase.classList.add('open');
+            treasure.classList.add('visible');
+            
+            message.textContent = '🎉 Mallette déverrouillée! 🎉';
+            message.className = 'message success';
+            
+            // Add celebration effect
+            createConfetti();
+        }
+
+        function showError() {
+            message.textContent = '❌ Mauvais code! Réessayer.';
+            message.className = 'message error';
+            
+            // Shake effect
+            briefcase.style.animation = 'shake 0.5s';
+            setTimeout(() => {
+                briefcase.style.animation = '';
+            }, 500);
+        }
+
+        function hideMessage() {
+            message.className = 'message hidden';
+        }
+
+        function resetCombination() {
+            digitInputs.forEach(input => {
+                input.value = '';
+            });
+            
+            briefcase.classList.remove('open');
+            briefcase.classList.add('closed');
+            treasure.classList.remove('visible');
+            
+            hideMessage();
+            digitInputs[0].focus();
+        }
+
+        function createConfetti() {
+            // Simple confetti effect
+            for (let i = 0; i < 50; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.style.cssText = `
+                        position: fixed;
+                        width: 10px;
+                        height: 10px;
+                        background: ${['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#ffeaa7'][Math.floor(Math.random() * 5)]};
+                        left: ${Math.random() * 100}vw;
+                        top: -10px;
+                        border-radius: 50%;
+                        pointer-events: none;
+                        z-index: 1000;
+                        animation: fall 3s linear forwards;
+                    `;
+                    
+                    document.body.appendChild(confetti);
+                    
+                    setTimeout(() => {
+                        confetti.remove();
+                    }, 3000);
+                }, i * 100);
+            }
+        }
+
+        // Add shake animation for wrong combination
+        const shakeStyle = document.createElement('style');
+        shakeStyle.textContent = `
+            @keyframes shake {
+                0%, 20%, 40%, 60%, 80%, 100% { transform: translateX(0); }
+                10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
+            }
+            @keyframes fall {
+                to {
+                    transform: translateY(100vh) rotate(360deg);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(shakeStyle);
+
+        // Focus first input on load
+        window.addEventListener('load', () => {
+            digitInputs[0].focus();
+        });
+    </script>
+</body>
+</html> 
